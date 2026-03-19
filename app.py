@@ -9,7 +9,7 @@ hisseler=["THYAO.IS", "EREGL.IS", "SISE.IS", "BTC-USD", "GC=f"]
 data=yf.download(hisseler, start="2023-01-01")['Close']
 
 # 2. Günlük Getiri ve Korelasyon (Matematik kısmı)
-returns=data.pct_chance()
+returns=data.pct_change()
 corr=returns.corr()
 
 # 3.Görselleştirme
