@@ -1,7 +1,7 @@
+streamlit==1.31.0
 yfinance
 pandas
 seaborn
 matplotlib
 plotly
-streamlit
-altair
+altair==5.2.0
