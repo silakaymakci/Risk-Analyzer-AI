@@ -4,8 +4,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.linear_model import LinearRegression
 
-# 1. SAYFA AYARLARI
+# 1. SAYFA AYARLARI (KRİTİK: EN ÜSTTE OLMALI)
 st.set_page_config(page_title="Chaos & Coherence | AI Risk Mentor", layout="wide")
 
 # Dark Academia Tasarımı
@@ -13,6 +14,7 @@ st.markdown("""
     <style>
     .main { background-color: #1e1e1e; color: #dcdcdc; }
     .stAlert { border-radius: 10px; }
+    .stMetric { background-color: #2b2b2b; padding: 10px; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -35,11 +37,10 @@ if st.sidebar.button("Analizi Başlat"):
         returns = df.pct_change().dropna()
 
     if not returns.empty:
-        # --- ÜST KISIM: KORELASYON ANALİZİ ---
+        # --- KISIM A: KORELASYON ANALİZİ (GELİŞMİŞ YORUM) ---
         st.subheader("📊 1. Varlıkların Dansı: Korelasyon Analizi")
         
         col1, col2 = st.columns([2, 1])
-        
         with col1:
             corr = returns.corr()
             fig, ax = plt.subplots(figsize=(8, 5))
@@ -49,10 +50,8 @@ if st.sidebar.button("Analizi Başlat"):
         with col2:
             st.markdown("### 💡 Bu Tablo Ne Diyor?")
             st.write("""
-            **Korelasyon**, varlıkların birbirini ne kadar takip ettiğini gösterir:
-            - **+1.0 (Koyu Kırmızı):** Ayrılmaz ikililer. Biri artarsa diğeri de artar.
-            - **0.0 (Beyaz):** Birbirinden habersizler. En iyi çeşitlendirme burada olur.
-            - **-1.0 (Koyu Mavi):** Zıt kardeşler. Biri düşerken diğeri yükselir (Risk kalkanı!).
+            **Korelasyon**, varlıkların birbirini ne kadar takip ettiğini gösterir. 
+            Amacımız, portföyde **düşük korelasyonlu** (beyaz veya mavi) varlıkları bir araya getirerek riski azaltmaktır.
             """)
             
             # Dinamik Yorum (AI Katmanı)
@@ -60,24 +59,42 @@ if st.sidebar.button("Analizi Başlat"):
             most_related = max_corr[max_corr < 0.999].index[0]
             st.warning(f"⚠️ **Dikkat:** {most_related[0]} ve {most_related[1]} arasında yüksek benzerlik var. İkisi aynı anda düşebilir!")
 
-        # --- ALT KISIM: RİSK TAHMİNİ ---
+        # --- KISIM B: GELECEK RİSK TAHMİNİ (YENİ AI ÖZELLİĞİ) ---
         st.markdown("---")
-        st.subheader("🤖 2. Yapay Zeka Risk Karnesi")
+        st.subheader("🤖 2. Yapay Zeka ile Gelecek 30 Günlük Risk Tahmini")
         
-        risk_list = [{"Varlık": c, "Risk": round(returns[c].std() * np.sqrt(252) * 100, 2)} for c in returns.columns]
-        risk_df = pd.DataFrame(risk_list).sort_values(by="Risk", ascending=False)
+        # Lineer Regresyon ile Risk Skoru (Oynaklık) Tahmini
+        risk_forecast = []
+        for col in returns.columns:
+            # Model için veri hazırla (Gün sayısı vs Getiri)
+            X = np.array(range(len(returns[col]))).reshape(-1, 1)
+            y = returns[col].values
+            
+            # Lineer Regresyon Modelini Eğit
+            model = LinearRegression()
+            model.fit(X, y)
+            
+            # Gelecek 30 günün olası getiri sapmasını tahmin et (Risk)
+            future_X = np.array(range(len(returns[col]), len(returns[col]) + 30)).reshape(-1, 1)
+            future_pred = model.predict(future_X)
+            
+            # Tahmin edilen volatiliteyi yıllıklandır
+            forecasted_vol = np.std(future_pred) * np.sqrt(252) * 100
+            risk_forecast.append({"Varlık": col, "Tahmin Edilen Risk (%)": round(forecasted_vol, 2)})
+            
+        forecast_df = pd.DataFrame(risk_forecast).sort_values(by="Tahmin Edilen Risk (%)", ascending=False)
         
-        st.bar_chart(risk_df.set_index('Varlık'))
+        st.bar_chart(forecast_df.set_index('Varlık'))
         
         # Risk Seviyesi Belirleme
-        en_riskli = risk_df.iloc[0]
-        st.error(f"🚀 **En Hareketli Varlık:** {en_riskli['Varlık']} (Risk Skoru: %{en_riskli['Risk']})")
-        st.info("💡 **Öneri:** Eğer bu risk sana fazlaysa, portföyüne korelasyonu düşük olan **Altın (GC=F)** eklemeyi düşünebilirsin.")
+        en_riskli_forecast = forecast_df.iloc[0]
+        st.error(f"🚀 **Öngörülen En Yüksek Risk:** {en_riskli_forecast['Varlık']} (Tahmin Edilen Risk Skoru: %{en_riskli_forecast['Tahmin Edilen Risk (%)']})")
+        st.info("💡 **AI Tavsiyesi:** Bu risk seviyesi yüksekse, portföyüne **Kıymetli Madenler (GC=F)** ekleyerek 'sakinleştirici' bir etki yaratabilirsin.")
 
     else:
         st.error("Veri çekilemedi. Lütfen bağlantınızı kontrol edin.")
 else:
-    st.info("Hoş geldin Sıla! Portföyünü analiz etmek ve AI tavsiyelerini görmek için 'Analizi Başlat' butonuna tıkla.")
+    st.info("Sıla, analizi başlatmak için sol menüden 'Analizi Başlat' butonuna tıkla. AI Mentor seni bekliyor!")
 
 st.markdown("---")
 st.caption("Bu uygulama bir yatırım tavsiyesi değildir, matematiksel bir modellemedir. | Future Talent Program")
