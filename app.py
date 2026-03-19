@@ -79,4 +79,4 @@ if st.sidebar.button("Analizi Başlat"):
         st.error("Veri alınamadı, lütfen farklı varlıklar veya gün sayısı seçin.")
 
 else:
-    st.info()
+    st.info("Sıla, analizi başlatmak için butona basman yeterli. Tüm sistem hazır!")
