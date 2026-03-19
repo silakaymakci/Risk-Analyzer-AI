@@ -1,7 +1,8 @@
-streamlit==1.31.0
+streamlit
 yfinance
 pandas
 seaborn
 matplotlib
 plotly
-altair==5.2.0
+scikit-learn
+numpy
