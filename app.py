@@ -135,6 +135,9 @@ if baslat:
         else:
             st.error("Veri çekilemedi.")
 else:
-    st.info("Sıla, analizi başlatmak için sol taraftaki 'Kontrol Paneli'nden butona tıkla.")
+    # BURASI GÜNCELLENDİ: ARTIK KİŞİSEL DEĞİL, PROFESYONEL KARŞILAMA VAR
+    st.info("🏛️ **Analize Hazırız!** Portföyünüzü derinlemesine incelemek ve AI öngörülerini görmek için sol taraftaki 'Analizi Başlat' butonuna tıklayınız.")
 
-st.caption("Future Talent Program 201 | Matematik & AI Entegrasyonu")
+# ALT BİLGİ: İSMİN BURADA ÇOK DAHA ŞIK DURUYOR
+st.markdown("---")
+st.caption("Future Talent Program 201 | Matematik & AI Entegrasyonu | Sıla Kaymakçı tarafından hazırlanmıştır.")
